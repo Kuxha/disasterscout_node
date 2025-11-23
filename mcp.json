@@ -1,0 +1,16 @@
+{
+    "mcpServers": {
+        "disasterscout": {
+            "command": "node",
+            "args": [
+                "dist/index.js"
+            ],
+            "env": {
+                "MONGO_URI": "${MONGO_URI}",
+                "MONGO_DB_NAME": "disaster_db",
+                "TAVILY_API_KEY": "${TAVILY_API_KEY}",
+                "OPENAI_API_KEY": "${OPENAI_API_KEY}"
+            }
+        }
+    }
+}
