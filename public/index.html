@@ -4,13 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DisasterScout Live Map</title>
+    <title>DisasterScout Map</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         body {
             margin: 0;
             padding: 0;
-            font-family: sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         #map {
@@ -20,79 +20,179 @@
 
         .controls {
             position: absolute;
-            top: 10px;
-            left: 50px;
-            /* Offset for zoom controls */
+            top: 20px;
+            left: 20px;
             z-index: 1000;
             background: white;
-            padding: 10px;
-            border-radius: 5px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-            display: flex;
-            gap: 10px;
-            align-items: center;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            width: 300px;
         }
 
-        .legend {
-            background: white;
-            padding: 10px;
-            border-radius: 5px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-            position: absolute;
-            bottom: 30px;
-            left: 10px;
-            z-index: 1000;
+        .controls h2 {
+            margin-top: 0;
+            font-size: 1.2rem;
+            color: #333;
         }
 
-        button {
-            padding: 8px 12px;
-            cursor: pointer;
-            background: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
+        .control-group {
+            margin-bottom: 15px;
         }
 
-        button:hover {
-            background: #0056b3;
-        }
-
-        button:disabled {
-            background: #ccc;
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            font-size: 0.9rem;
         }
 
         select,
-        input {
+        input,
+        button {
+            width: 100%;
             padding: 8px;
-            border: 1px solid #ccc;
+            margin-bottom: 5px;
+            border: 1px solid #ddd;
             border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button.secondary {
+            background-color: #6c757d;
+        }
+
+        button.secondary:hover {
+            background-color: #545b62;
+        }
+
+        .legend {
+            position: absolute;
+            bottom: 30px;
+            right: 20px;
+            z-index: 1000;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+            display: inline-block;
+        }
+
+        .dot.sos {
+            background: #dc3545;
+        }
+
+        .dot.shelter {
+            background: #28a745;
+        }
+
+        .dot.info {
+            background: #17a2b8;
+        }
+
+        /* Popup Styling */
+        .popup-content h3 {
+            margin: 0 0 5px;
+            font-size: 1rem;
+        }
+
+        .popup-content p {
+            margin: 5px 0;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        .popup-content .category {
+            font-weight: bold;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: white;
+            display: inline-block;
+        }
+
+        .cat-SOS {
+            background: #dc3545;
+        }
+
+        .cat-SHELTER {
+            background: #28a745;
+        }
+
+        .cat-INFO {
+            background: #17a2b8;
+        }
+
+        .cat-OTHER {
+            background: #6c757d;
+        }
+
+        .popup-content a {
+            font-size: 0.8rem;
+            color: #007bff;
         }
     </style>
 </head>
 
 <body>
     <div class="controls">
-        <select id="regionSelect">
-            <option value="">Select Region...</option>
-            <option value="California">California</option>
-            <option value="New York">New York</option>
-            <option value="Japan">Japan</option>
-            <option value="Florida">Florida</option>
-            <option value="Texas">Texas</option>
-        </select>
-        <input type="text" id="topicInput" placeholder="Topic (e.g. flood)" value="disaster">
-        <button id="scanBtn">Scan Region</button>
-        <button id="locateBtn">📍 Get Location</button>
+        <h2>DisasterScout</h2>
+
+        <div class="control-group">
+            <label>Region</label>
+            <select id="regionSelect">
+                <option value="">Select Region...</option>
+                <option value="Brooklyn, NY">Brooklyn, NY</option>
+                <option value="Bay Ridge, Brooklyn, NY">Bay Ridge, Brooklyn</option>
+                <option value="Nha Trang, Vietnam">Nha Trang, Vietnam</option>
+                <option value="Binh Dinh Province, Vietnam">Binh Dinh, Vietnam</option>
+            </select>
+            <button id="loadRegionBtn">Load Region</button>
+        </div>
+
+        <div class="control-group">
+            <label>Near Me (Radius km)</label>
+            <input type="number" id="radiusInput" value="10" min="1" max="100">
+            <button id="nearMeBtn" class="secondary">Find Near Me</button>
+        </div>
+
+        <div id="status" style="font-size: 0.8rem; color: #666; margin-top: 10px;"></div>
+    </div>
+
+    <div class="legend">
+        <div class="legend-item"><span class="dot sos"></span> SOS / Danger</div>
+        <div class="legend-item"><span class="dot shelter"></span> Shelter / Aid</div>
+        <div class="legend-item"><span class="dot info"></span> Info / Advisory</div>
     </div>
 
     <div id="map"></div>
-
-    <div class="legend">
-        <h3>DisasterScout</h3>
-        <p>🔴 SOS</p>
-        <p>🏠 SHELTER</p>
-        <p>ℹ️ INFO</p>
-    </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="app.js"></script>

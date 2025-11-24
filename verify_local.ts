@@ -8,7 +8,7 @@ async function main() {
     const transport = new StdioClientTransport({
         command: "node",
         args: ["dist/index.js"],
-        env: process.env
+        env: process.env as Record<string, string>
     });
 
     const client = new Client(

@@ -117,10 +117,15 @@ export function registerTools(server: McpServer) {
 
             const brief = await generateBrief(region, topic, stats);
 
+            // Add map link
+            // We assume localhost:3000 for local demo
+            const mapUrl = `http://localhost:3000/?region=${encodeURIComponent(region)}`;
+            const fullResponse = `${brief}\n\nYou can view the incident map here: [DisasterScout Map](${mapUrl})`;
+
             return {
                 content: [{
                     type: "text",
-                    text: brief || "Could not generate brief."
+                    text: fullResponse
                 }]
             };
         }
